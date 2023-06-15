@@ -60,8 +60,8 @@ jobs:
                 run: |
                     poetry install -E doc
                     poetry run mkdocs build
-                    git config --global user.name <github-username>
-                    git config --global user.email <email>
+                    git config --global user.name bidev01
+                    git config --global user.email bi.dev.01@ikameglobal.com
                     poetry run mkdocs gh-deploy --force
 
 

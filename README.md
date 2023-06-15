@@ -1,6 +1,13 @@
-# Python Library Template
+# bi-tiktok-business-api-master
 
-Steps to use this template:
+[![release](https://img.shields.io/pypi/v/bi-tiktok-business-api-master.svg)](https://pypi.org/project/bi-tiktok-business-api-master/)
+[![docs](https://img.shields.io/website/https/bidev01.github.io/bi-tiktok-business-api-master/index.html.svg?label=docs&down_message=unavailable&up_message=available)](https://bidev01.github.io/bi-tiktok-business-api-master)
+[![develop](https://github.com/bidev01/bi-tiktok-business-api-master/actions/workflows/dev.yml/badge.svg)](https://github.com/bidev01/bi-tiktok-business-api-master/actions/workflows/dev.yml)
+[![main](https://github.com/bidev01/bi-tiktok-business-api-master/actions/workflows/release.yml/badge.svg)](https://github.com/bidev01/bi-tiktok-business-api-master/actions/workflows/release.yml)
 
-1. Create a new repository on GitHub using this template
-2. Add write permissions to workflow
+Tiktok Business API wrapper
+
+## Features
+
+* Something
+* Something else

@@ -1,10 +1,10 @@
 [tool]
 [tool.poetry]
-name = "<package-name>"
+name = "bi-tiktok-business-api-master"
 version = "0.1.0"
-homepage = "https://github.com/<github-username>/<package-name>"
-description = "<description>"
-authors = ["<github-username> <<email>>"]
+homepage = "https://github.com/bidev01/bi-tiktok-business-api-master"
+description = "Tiktok Business API wrapper"
+authors = ["bidev01 <bi.dev.01@ikameglobal.com>"]
 readme = "README.md"
 license = "MIT"
 classifiers = [
@@ -15,7 +15,7 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
 ]
 packages = [
-    { include = "<package-name-underscore>" },
+    { include = "bi_tiktok_business_api_master" },
     { include = "tests", format = "sdist" },
 ]
 

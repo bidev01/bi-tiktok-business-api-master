@@ -1,1 +1,1 @@
-::: <package-name-underscore>.example
+::: bi_tiktok_business_api_master.example

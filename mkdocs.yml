@@ -1,7 +1,7 @@
-site_name: <package-name>
+site_name: bi-tiktok-business-api-master
 # site_url: http://www.jieyu.ai
-repo_url: https://github.com/<github-username>/<package-name>
-repo_name: <package-name>
+repo_url: https://github.com/bidev01/bi-tiktok-business-api-master
+repo_name: bi-tiktok-business-api-master
 #strict: true
 nav:
     -   Home: index.md
@@ -57,14 +57,14 @@ plugins:
             lang: en
     -   mkdocstrings:
             watch:
-                - <package-name-underscore>
+                - bi_tiktok_business_api_master
 extra:
     social:
         -   icon: fontawesome/brands/github
-            link: https://github.com/<github-username>
+            link: https://github.com/bidev01
             name: Github
         -   icon: material/email
-            link: "mailto:<email>"
+            link: "mailto:bi.dev.01@ikameglobal.com"
     # to enable disqus, uncomment the following and put your disqus id below
     # disqus: disqus_id
     # uncomment the following and put your google tracking id below to enable GA

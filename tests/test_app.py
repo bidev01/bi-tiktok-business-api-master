@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-"""Tests for `<package-name-underscore>` package."""
+"""Tests for `bi_tiktok_business_api_master` package."""
 # pylint: disable=redefined-outer-name
 
 import os
+
 import pytest
 
-from <package-name-underscore> import SampleClass
+from bi_tiktok_business_api_master import SampleClass
 
 
 @pytest.fixture
