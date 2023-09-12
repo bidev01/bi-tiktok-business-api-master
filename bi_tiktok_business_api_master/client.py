@@ -30,20 +30,22 @@ _logger = logging.getLogger(__name__)
 
 
 class TikTokBusinessClient:
-    """TikTok Buisness client used to configure settings and fetch services."""
+    """
+
+    The main class that is used to interact with the TikTok Business API.
+
+    """
 
     _session = None
-    BUISNESS_URL = "https://business-api.tiktok.com/open_api"
+    BUSINESS_URL = "https://business-api.tiktok.com/open_api"
     SANDBOX_URL = "https://sandbox-ads.tiktok.com/open_api"
-    VERSION = "v1.2"
+    VERSION = "v1.3"
     DEFAULT_CRED_PATH = os.path.join(os.path.expanduser("~"), "work", ".secrets", "tiktok_credentials.json")
 
-    def __init__(self, access_token, secret, app_id, sandbox=False):
+    def __init__(self, access_token, advertiser_id, sandbox=False):
         self.__access_token = access_token
-        self.__secret = secret
-        self.__app_id = app_id
-
-        self.base_url = self.SANDBOX_URL if sandbox else self.BUISNESS_URL
+        self.advertiser_id = advertiser_id
+        self.base_url = self.SANDBOX_URL if sandbox else self.BUSINESS_URL
         self.base_url = self.build_url(self.base_url, self.VERSION)
 
         if not self._session:
@@ -51,24 +53,92 @@ class TikTokBusinessClient:
 
         self.discover_services()
 
+    ###########################################################################
+    #                          CLASS METHODS                                  #
+    ###########################################################################
     @classmethod
-    def from_json_file(cls, json_file_path=DEFAULT_CRED_PATH, sandbox=False):
+    def from_json_file(cls,
+                       advertiser_id: str,
+                       json_file_path: str = DEFAULT_CRED_PATH,
+                       sandbox: bool = False) -> 'TikTokBusinessClient':
+        """
+
+        Creates a TikTokBusinessClient instance from the json file containing the credentials.
+
+        Args:
+            advertiser_id: Advertiser id to be used.
+            json_file_path: Path to the json file containing the credentials.
+            sandbox: Whether to use sandbox or not.
+
+        Returns:
+            TikTokBusinessClient instance.
+
+        """
         if not os.path.exists(json_file_path):
             raise Exception(f"File not found at {json_file_path}")
         with open(json_file_path, "r") as f:
-            data = json.loads(f.read())
-
+            data = json.load(f)
         access_token = data["access_token"]
-        secret = data["secret"]
-        app_id = data["app_id"]
 
-        return cls(access_token, secret, app_id, sandbox)
+        return cls(access_token, advertiser_id, sandbox)
 
     @classmethod
-    def from_dict(cls, data):
-        return cls(data["access_token"], data["secret"], data["app_id"], data.get("sandbox"))
+    def from_dict(cls, data: dict) -> 'TikTokBusinessClient':
+        """
 
-    def _sanitize_params(self, params):
+        Creates a TikTokBusinessClient instance from the dictionary containing the credentials.
+
+        Args:
+            data: Dictionary containing the credentials.
+
+        Returns:
+            TikTokBusinessClient instance.
+
+        """
+        return cls(data["access_token"], data["advertiser_id"], data.get("sandbox"))
+
+    ###########################################################################
+    #                          STATIC METHODS                                 #
+    ###########################################################################
+    @staticmethod
+    def get_advertiser_ids(json_file_path: str = DEFAULT_CRED_PATH) -> list[str]:
+        """
+
+        Fetches all the advertiser ids associated with the access token.
+
+        Args:
+            json_file_path: Path to the json file containing the credentials.
+
+        Returns:
+            List of advertiser ids.
+
+        """
+        if not os.path.exists(json_file_path):
+            raise Exception(f"File not found at {json_file_path}")
+        with open(json_file_path, "r") as f:
+            creds = json.load(f)
+
+        url = f'{TikTokBusinessClient.BUSINESS_URL}/{TikTokBusinessClient.VERSION}/oauth2/advertiser/get/'
+        params = {
+            "secret": creds["secret"],
+            "app_id": creds["app_id"],
+        }
+        with requests.Session() as session:
+            session.headers.update(
+                {
+                    "Content-Type": "application/json",
+                    "Access-Token": creds["access_token"]
+                }
+            )
+            response = session.get(url, params=params)
+            if not response.ok:
+                raise Exception(f"Error fetching advertiser ids: {response.content}")
+            response = response.json()
+            data_list = response["data"]["list"]
+            return [data["advertiser_id"] for data in data_list]
+
+    @staticmethod
+    def _sanitize_params(params):
         def cast_to_dtype(dictionary):
             for key, value in dictionary.items():
                 if isinstance(value, dict):
@@ -82,6 +152,23 @@ class TikTokBusinessClient:
         cast_to_dtype(params)
         return params
 
+    @staticmethod
+    def __get_module_cls(module_name, module):
+        module_name = module_name.title().replace("_", "")
+        if hasattr(module, module_name):
+            return getattr(module, module_name)
+
+    @staticmethod
+    def build_url(base_url, service_endpoint):
+        base_url = (base_url + "/") if not base_url.endswith("/") else base_url
+        service_endpoint = service_endpoint[1:] if service_endpoint.startswith("/") else service_endpoint
+        service_endpoint = (service_endpoint + "/") if not service_endpoint.endswith("/") else service_endpoint
+
+        return base_url + service_endpoint
+
+    ###########################################################################
+    #                          INSTANCE METHODS                               #
+    ###########################################################################
     def _create_session(self):
         self._session = requests.Session()
         self._session.hooks['response'].append(self.__request_response_hook)
@@ -93,12 +180,12 @@ class TikTokBusinessClient:
     def __request_response_hook(self, *args, **kwargs):
         self._session.headers.pop("Content-Type") if "Content-Type" in self._session.headers else None
 
-    def __get_module_cls(self, module_name, module):
-        module_name = module_name.title().replace("_", "")
-        if hasattr(module, module_name):
-            return getattr(module, module_name)
-
     def discover_services(self):
+        """
+
+        Discovers all the services and loads them as attributes of the client instance.
+
+        """
         cwd = os.path.dirname(os.path.realpath(__file__))
         services_path = os.path.join(cwd, "services")
         for importer, modname, ispkg in pkgutil.iter_modules([services_path]):
@@ -108,13 +195,6 @@ class TikTokBusinessClient:
                 setattr(self, modname, cls_instance(client=self))
                 _logger.debug(f"{modname} module loaded successfully")
         _logger.debug("Finished loading modules")
-
-    def build_url(self, base_url, service_endpoint):
-        base_url = (base_url + "/") if not base_url.endswith("/") else base_url
-        service_endpoint = service_endpoint[1:] if service_endpoint.startswith("/") else service_endpoint
-        service_endpoint = (service_endpoint + "/") if not service_endpoint.endswith("/") else service_endpoint
-
-        return base_url + service_endpoint
 
     def make_request(self, method, url, params={}, files=None):
         params.update({"advertiser_id": self.advertiser_id}) if "advertiser_id" not in params else None
