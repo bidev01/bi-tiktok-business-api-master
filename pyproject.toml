@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "bi-tiktok-business-api-master"
-version = "0.1.2"
+version = "1.0.0"
 homepage = "https://github.com/bidev01/bi-tiktok-business-api-master"
 description = "Tiktok Business API wrapper"
 authors = ["bidev01 <bi.dev.01@ikameglobal.com>"]
